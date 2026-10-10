@@ -1,1 +1,13 @@
-[]
+[
+ {
+  "id": 1,
+  "title": "dsada",
+  "author": "asdsa",
+  "genre": "Action",
+  "type": "text",
+  "year": 213,
+  "copies": 1,
+  "desc": "sadsa",
+  "textFile": "library/text/1.txt"
+ }
+]
