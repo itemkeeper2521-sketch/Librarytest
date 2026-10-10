@@ -9,5 +9,16 @@
   "copies": 1,
   "desc": "sadsa",
   "textFile": "library/text/1.txt"
+ },
+ {
+  "id": 2,
+  "title": "testing",
+  "author": "john paul",
+  "genre": "Comedy",
+  "type": "text",
+  "year": 2007,
+  "copies": 3,
+  "desc": "This is a Description",
+  "textFile": "library/text/2.txt"
  }
 ]
