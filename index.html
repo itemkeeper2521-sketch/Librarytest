@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home | Online Library</title>
+  <!-- CSS TEAM: every page uses this one file, css/style.css. Create it and write all the styles there.
+       Tip: start with the header, buttons and book cards because they appear on every page. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home">
+
+  <!-- HEADER (the same on every page, so copy any change to all pages).
+       JS TEAM:
+        1. Check localStorage for a logged-in user.
+        2. If someone is logged in, change the text of #auth-btn to "Log out (name)". Unhide the links that have data-auth="user". Admins also get data-auth="admin".
+        Hint: element.hidden = false;
+        3. When the user clicks Log out, remove the saved user and go to index.html.
+       CSS TEAM: the link of the page you are on has aria-current="page". Style it with a[aria-current="page"] { } -->
+  <header class="site-header">
+    <a class="site-header__brand" href="index.html">Online Library</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="my-library.html" data-auth="user" hidden>My Library</a>
+      <a href="admin.html" data-auth="admin" hidden>Admin</a>
+      <a href="login.html" id="auth-btn" class="btn">Log in</a>
+    </nav>
+  </header>
+
+  <main class="page page--home">
+    <!-- HOME PAGE: introduction, quick search and featured books.
+         JS TEAM:
+          1. Take the first few books from library/books.json and build one book card for each inside #featured-grid (see the sample card below).
+          2. The search form already sends the user to catalog.html?q=what-they-typed, so the catalog page does the searching.
+         CSS TEAM: make .hero stand out, and lay out .book-grid with CSS grid (grid-template-columns: repeat(auto-fill, minmax(160px, 1fr))). -->
+    <section class="hero">
+      <h1>Every shelf, one search away.</h1>
+      <p>Novels, classics, manga and manhwa. Check availability, build a reading list and read online.</p>
+      <form id="home-search-form" class="search-form" action="catalog.html" method="get" role="search">
+        <label for="home-q" class="visually-hidden">Search books</label>
+        <input id="home-q" name="q" type="search" placeholder="Search title, author or genre">
+        <button type="submit" class="btn">Search</button>
+      </form>
+    </section>
+
+    <section class="section" aria-labelledby="featured-title">
+      <h2 id="featured-title">Featured</h2>
+      <div id="featured-grid" class="book-grid">
+        <!-- ONE BOOK CARD (the same card is used on the home, catalog and my-library pages).
+             data-book-id is the book's id from library/books.json, data-type is text, manga, manhwa or comic, and data-status is available or checked-out.
+             JS TEAM: when a card is clicked (or Enter is pressed), open the details pop-up for that book. Hint: card.dataset.bookId
+             CSS TEAM: use the data attributes to style by type or status, for example .book-card[data-status="checked-out"] { } -->
+        <article class="book-card" data-book-id="1" data-type="text" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Pride and Prejudice</div>
+          <div class="book-card__meta">
+            <span class="tag tag--text">Book</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Pride and Prejudice</h3>
+          <p class="book-card__author">Jane Austen</p>
+        </article>
+        <article class="book-card" data-book-id="28" data-type="manga" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Moonlit Ronin (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manga">Manga</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Moonlit Ronin (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+        <article class="book-card" data-book-id="29" data-type="manhwa" data-status="checked-out" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Tower of Echoes (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manhwa">Manhwa</span>
+            <span class="status status--checked-out">Checked out</span>
+          </div>
+          <h3 class="book-card__title">Tower of Echoes (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="how-title">
+      <h2 id="how-title">How it works</h2>
+      <ol class="steps">
+        <li>Search or browse the catalog.</li>
+        <li>Open a book to see its details and availability.</li>
+        <li>Add it to your reading list, borrow it or join the waitlist.</li>
+        <li>Read it online.</li>
+      </ol>
+    </section>
+  </main>
+
+  <!-- TOAST: a small message such as "Borrowed" or "Saved".
+       JS TEAM: write a function showToast(text) that sets the text, removes hidden, and adds hidden back after about 2 seconds (setTimeout).
+       CSS TEAM: place it at the bottom center of the screen with position: fixed. -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <p>Online Library &middot; BSIT Group 1 &middot; ICCT Colleges Foundation Inc. &middot; School project</p>
+  </footer>
+
+  <!-- SCRIPTS: the order matters. app.js holds the code every page needs (it also loads the book list from library/books.json), and the last file is only for this page. -->
+  <script src="js/app.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

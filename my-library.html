@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Library | Online Library</title>
+  <!-- CSS TEAM: every page uses this one file, css/style.css. Create it and write all the styles there.
+       Tip: start with the header, buttons and book cards because they appear on every page. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="my-library">
+
+  <!-- HEADER (the same on every page, so copy any change to all pages).
+       JS TEAM:
+        1. Check localStorage for a logged-in user.
+        2. If someone is logged in, change the text of #auth-btn to "Log out (name)". Unhide the links that have data-auth="user". Admins also get data-auth="admin".
+        Hint: element.hidden = false;
+        3. When the user clicks Log out, remove the saved user and go to index.html.
+       CSS TEAM: the link of the page you are on has aria-current="page". Style it with a[aria-current="page"] { } -->
+  <header class="site-header">
+    <a class="site-header__brand" href="index.html">Online Library</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="my-library.html" aria-current="page" data-auth="user" hidden>My Library</a>
+      <a href="admin.html" data-auth="admin" hidden>Admin</a>
+      <a href="login.html" id="auth-btn" class="btn">Log in</a>
+    </nav>
+  </header>
+
+  <main class="page page--my-library">
+    <!-- MY LIBRARY PAGE: only for logged-in users. If nobody is logged in, send the visitor to login.html.
+         JS TEAM: read the current user's saved list, loans and waits, find the matching books, and build a card for each one in the matching grid.
+                  If a list is empty, remove hidden from its "empty" message.
+                  The Return and Leave waitlist buttons use data-action and data-book-id so one click handler can handle all of them.
+                  When a book is returned and someone is waiting, give it to the first person in the waitlist.
+         CSS TEAM: put each button under its card (.book-card__actions). -->
+    <h1>My Library</h1>
+
+    <!-- CONTINUE READING: books the user has started. Remove hidden only when there is at least one.
+         JS TEAM: build the cards from the saved progress, and add a link that opens reader.html?id=..&ch=.. at the saved chapter. -->
+    <section id="continue-section" class="section" aria-labelledby="continue-title" hidden>
+      <h2 id="continue-title">Continue reading</h2>
+      <div id="continue-grid" class="book-grid"></div>
+    </section>
+
+    <section class="section" aria-labelledby="list-title">
+      <h2 id="list-title">Reading list</h2>
+      <div id="reading-list-grid" class="book-grid">
+        <article class="book-card" data-book-id="1" data-type="text" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Pride and Prejudice</div>
+          <div class="book-card__meta">
+            <span class="tag tag--text">Book</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Pride and Prejudice</h3>
+          <p class="book-card__author">Jane Austen</p>
+        </article>
+      </div>
+      <p id="reading-list-empty" class="empty-state" hidden>Your reading list is empty. Open a book and choose Add to reading list.</p>
+    </section>
+
+    <section class="section" aria-labelledby="loans-title">
+      <h2 id="loans-title">Borrowed</h2>
+      <div id="loans-grid" class="book-grid">
+        <div class="book-card-wrap">
+        <article class="book-card" data-book-id="28" data-type="manga" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Moonlit Ronin (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manga">Manga</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Moonlit Ronin (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+          <div class="book-card__actions"><button type="button" class="btn btn--ghost" data-action="return" data-book-id="28">Return</button></div>
+        </div>
+      </div>
+      <p id="loans-empty" class="empty-state" hidden>No borrowed books.</p>
+    </section>
+
+    <section class="section" aria-labelledby="waits-title">
+      <h2 id="waits-title">Waitlist</h2>
+      <div id="waitlist-grid" class="book-grid">
+        <div class="book-card-wrap">
+        <article class="book-card" data-book-id="29" data-type="manhwa" data-status="checked-out" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Tower of Echoes (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manhwa">Manhwa</span>
+            <span class="status status--checked-out">Checked out</span>
+          </div>
+          <h3 class="book-card__title">Tower of Echoes (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+          <div class="book-card__actions"><button type="button" class="btn btn--ghost" data-action="unwait" data-book-id="29">Leave waitlist</button></div>
+        </div>
+      </div>
+      <p id="waitlist-empty" class="empty-state" hidden>You are not on any waitlist.</p>
+    </section>
+  </main>
+
+  <!-- TOAST: a small message such as "Borrowed" or "Saved".
+       JS TEAM: write a function showToast(text) that sets the text, removes hidden, and adds hidden back after about 2 seconds (setTimeout).
+       CSS TEAM: place it at the bottom center of the screen with position: fixed. -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <p>Online Library &middot; BSIT Group 1 &middot; ICCT Colleges Foundation Inc. &middot; School project</p>
+  </footer>
+
+  <!-- SCRIPTS: the order matters. app.js holds the code every page needs (it also loads the book list from library/books.json), and the last file is only for this page. -->
+  <script src="js/app.js"></script>
+  <script src="js/my-library.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reader | Online Library</title>
+  <!-- CSS TEAM: every page uses this one file, css/style.css. Create it and write all the styles there.
+       Tip: start with the header, buttons and book cards because they appear on every page. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="reader">
+
+  <!-- HEADER (the same on every page, so copy any change to all pages).
+       JS TEAM:
+        1. Check localStorage for a logged-in user.
+        2. If someone is logged in, change the text of #auth-btn to "Log out (name)". Unhide the links that have data-auth="user". Admins also get data-auth="admin".
+        Hint: element.hidden = false;
+        3. When the user clicks Log out, remove the saved user and go to index.html.
+       CSS TEAM: the link of the page you are on has aria-current="page". Style it with a[aria-current="page"] { } -->
+  <header class="site-header">
+    <a class="site-header__brand" href="index.html">Online Library</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="catalog.html" aria-current="page">Catalog</a>
+      <a href="my-library.html" data-auth="user" hidden>My Library</a>
+      <a href="admin.html" data-auth="admin" hidden>Admin</a>
+      <a href="login.html" id="auth-btn" class="btn">Log in</a>
+    </nav>
+  </header>
+
+  <main class="page page--reader">
+    <!-- READER PAGE (reader.html?id=1). Only ONE of the three sections below should be visible. The other two keep the hidden attribute.
+         #text-reader: for books made of text. Make one <p> for each paragraph (split the text on a blank line) and put them in #text-body.
+         #page-reader: for manga and comics, one page at a time. Keep a page number variable, change the src of #page-image, update #page-counter, and connect the Previous and Next buttons.
+                       For manga the reading goes right to left, so the data-direction is "rtl" and the buttons should swap places.
+         #strip-reader: for manhwa. Make one <img> for each page inside #strip-body. The user scrolls down to read.
+         CSS TEAM: make images fit the screen (max-width: 100%) and keep the reading text about 65 characters wide so it is easy to read. -->
+    <div class="reader-bar">
+      <a href="catalog.html">&larr; Back to catalog</a>
+      <h1 id="reader-title">Book title</h1>
+    </div>
+
+    <!-- CHAPTER NAVIGATION: only for series with 2 or more chapters (remove hidden for them).
+         JS TEAM: fill #chapter-select with one option per chapter. Changing it, or pressing Previous or Next, opens reader.html?id=..&ch=..
+                  Hide or disable Previous on the first chapter and Next on the last one. -->
+    <nav id="chapter-nav" class="chapter-nav" aria-label="Chapters" hidden>
+      <button id="chapter-prev" type="button" class="btn btn--ghost">Previous chapter</button>
+      <select id="chapter-select" aria-label="Choose a chapter"></select>
+      <button id="chapter-next" type="button" class="btn btn--ghost">Next chapter</button>
+    </nav>
+
+    <section id="text-reader" class="reader reader--text" aria-label="Book text">
+      <div id="text-body">
+        <p>Paragraph one of the book goes here.</p>
+        <p>Paragraph two of the book goes here.</p>
+      </div>
+    </section>
+
+    <section id="page-reader" class="reader reader--pages" data-direction="ltr" aria-label="Page reader" hidden>
+      <figure>
+        <img id="page-image" src="" alt="Page 1">
+      </figure>
+      <div class="reader__controls">
+        <button id="page-prev" type="button" class="btn btn--ghost">Previous</button>
+        <span id="page-counter" aria-live="polite">Page 1 of 1</span>
+        <button id="page-next" type="button" class="btn btn--ghost">Next</button>
+      </div>
+    </section>
+
+    <section id="strip-reader" class="reader reader--strip" aria-label="Vertical scroll reader" hidden>
+      <div id="strip-body">
+        <img src="" alt="Page 1">
+      </div>
+    </section>
+    <!-- CHAPTER BUTTONS AT THE BOTTOM: for series with 2 or more chapters (remove hidden for them).
+         JS TEAM: #end-prev and #end-next open the previous and next chapter. Disable a button when that chapter does not exist.
+                  On the last page of a manga or comic, the Next page button should say "Next chapter" and open the next chapter. -->
+    <div id="chapter-end" class="reader__end" hidden>
+      <button id="end-prev" type="button" class="btn btn--ghost">Previous chapter</button>
+      <button id="end-next" type="button" class="btn">Next chapter</button>
+    </div>
+  </main>
+
+  <!-- TOAST: a small message such as "Borrowed" or "Saved".
+       JS TEAM: write a function showToast(text) that sets the text, removes hidden, and adds hidden back after about 2 seconds (setTimeout).
+       CSS TEAM: place it at the bottom center of the screen with position: fixed. -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <p>Online Library &middot; BSIT Group 1 &middot; ICCT Colleges Foundation Inc. &middot; School project</p>
+  </footer>
+
+  <!-- SCRIPTS: the order matters. app.js holds the code every page needs (it also loads the book list from library/books.json), and the last file is only for this page. -->
+  <script src="js/app.js"></script>
+  <script src="js/reader.js"></script>
+</body>
+</html>

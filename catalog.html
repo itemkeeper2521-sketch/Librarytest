@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catalog | Online Library</title>
+  <!-- CSS TEAM: every page uses this one file, css/style.css. Create it and write all the styles there.
+       Tip: start with the header, buttons and book cards because they appear on every page. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="catalog">
+
+  <!-- HEADER (the same on every page, so copy any change to all pages).
+       JS TEAM:
+        1. Check localStorage for a logged-in user.
+        2. If someone is logged in, change the text of #auth-btn to "Log out (name)". Unhide the links that have data-auth="user". Admins also get data-auth="admin".
+        Hint: element.hidden = false;
+        3. When the user clicks Log out, remove the saved user and go to index.html.
+       CSS TEAM: the link of the page you are on has aria-current="page". Style it with a[aria-current="page"] { } -->
+  <header class="site-header">
+    <a class="site-header__brand" href="index.html">Online Library</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="catalog.html" aria-current="page">Catalog</a>
+      <a href="my-library.html" data-auth="user" hidden>My Library</a>
+      <a href="admin.html" data-auth="admin" hidden>Admin</a>
+      <a href="login.html" id="auth-btn" class="btn">Log in</a>
+    </nav>
+  </header>
+
+  <main class="page page--catalog">
+    <!-- CATALOG PAGE: search, filters and the list of books.
+         JS TEAM:
+          1. On page load, read the search text from the address (new URLSearchParams(location.search).get('q')) and put it in #search-input.
+          2. Every time the search box or a dropdown changes, filter the book list from library/books.json and rebuild #catalog-grid. Do not reload the page.
+          3. Update #result-count (for example "12 of 30 titles"). If nothing matches, remove hidden from #empty-state.
+          4. Fill #genre-select with each genre found in library/books.json, with no repeats. Hint: [...new Set(books.map(b => b.genre))]
+         CSS TEAM: lay out the .filters form in a row that wraps on small screens (display: flex; flex-wrap: wrap). -->
+    <h1>Catalog</h1>
+    <form id="filter-form" class="filters" role="search">
+      <label>Search<input id="search-input" name="q" type="search" placeholder="Title, author or genre"></label>
+      <label>Genre<select id="genre-select" name="genre"><option value="">All genres</option></select></label>
+      <label>Format
+        <select id="type-select" name="type">
+          <option value="">All formats</option>
+          <option value="text">Books (text)</option>
+          <option value="manga">Manga</option>
+          <option value="manhwa">Manhwa</option>
+          <option value="comic">Comics</option>
+        </select>
+      </label>
+      <label>Availability
+        <select id="avail-select" name="avail">
+          <option value="">Any availability</option>
+          <option value="available">Available</option>
+          <option value="checked-out">Checked out</option>
+        </select>
+      </label>
+      <button type="reset" class="btn btn--ghost">Clear filters</button>
+    </form>
+
+    <p id="result-count" class="muted" aria-live="polite">4 of 30 titles</p>
+    <div id="catalog-grid" class="book-grid">
+        <article class="book-card" data-book-id="1" data-type="text" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Pride and Prejudice</div>
+          <div class="book-card__meta">
+            <span class="tag tag--text">Book</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Pride and Prejudice</h3>
+          <p class="book-card__author">Jane Austen</p>
+        </article>
+        <article class="book-card" data-book-id="2" data-type="text" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Alice's Adventures in Wonderland</div>
+          <div class="book-card__meta">
+            <span class="tag tag--text">Book</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Alice's Adventures in Wonderland</h3>
+          <p class="book-card__author">Lewis Carroll</p>
+        </article>
+        <article class="book-card" data-book-id="28" data-type="manga" data-status="available" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Moonlit Ronin (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manga">Manga</span>
+            <span class="status status--available">Available</span>
+          </div>
+          <h3 class="book-card__title">Moonlit Ronin (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+        <article class="book-card" data-book-id="29" data-type="manhwa" data-status="checked-out" tabindex="0">
+          <div class="book-card__cover" aria-hidden="true">Tower of Echoes (sample)</div>
+          <div class="book-card__meta">
+            <span class="tag tag--manhwa">Manhwa</span>
+            <span class="status status--checked-out">Checked out</span>
+          </div>
+          <h3 class="book-card__title">Tower of Echoes (sample)</h3>
+          <p class="book-card__author">Library Demo Studio</p>
+        </article>
+    </div>
+    <p id="empty-state" class="empty-state" hidden>No matches. Try a different keyword or clear a filter.</p>
+
+    <!-- BOOK DETAILS POP-UP: a built-in <dialog> that opens on top of the page.
+         JS TEAM:
+          1. When a card is clicked, find the book by its id and put its info into the elements marked data-field. Hint: modal.querySelector('[data-field="title"]').textContent = book.title
+          2. Open it with document.getElementById('book-modal').showModal() and close it with .close().
+          3. Show only the buttons that make sense, using the hidden attribute:
+             not logged in -> any action sends the user to login.html
+             copies are free -> show Borrow | no free copies -> show Join the waitlist
+             user already borrowed it -> show Return book | user is already waiting -> show Leave waitlist
+          4. Free copies = total copies minus the number of users who borrowed the book.
+         CSS TEAM: style .modal and the dark background behind it with dialog::backdrop { } -->
+    <dialog id="book-modal" class="modal" aria-labelledby="modal-title">
+      <article class="book-details" data-book-id="">
+        <div class="book-details__cover" aria-hidden="true" data-field="cover"></div>
+        <div class="book-details__info">
+          <h2 id="modal-title" data-field="title">Book title</h2>
+          <p class="muted"><span data-field="author">Author</span> &middot; <span data-field="genre">Genre</span> &middot; <span data-field="year">Year</span> &middot; <span data-field="type">Format</span></p>
+          <p data-field="description">Short description.</p>
+          <p class="status" data-field="availability">Available (2 of 2 copies)</p>
+          <!-- CHAPTERS: only shown when the series has 2 or more chapters.
+             JS TEAM: fill #chapter-list with one list item per chapter, each with a link like reader.html?id=28&ch=2.
+             Also change the Read button: if the user has saved progress, say "Continue reading" and point it at the saved chapter.
+             CSS TEAM: if the list is long, make it scroll (max-height and overflow-y: auto). -->
+        <section id="chapter-section" class="chapters" hidden>
+          <h3>Chapters</h3>
+          <ol id="chapter-list" class="chapter-list"></ol>
+        </section>
+        <div class="actions">
+            <a id="btn-read" class="btn" href="reader.html">Read online</a>
+            <button id="btn-list" type="button" class="btn btn--ghost">Add to reading list</button>
+            <button id="btn-borrow" type="button" class="btn btn--ghost">Borrow</button>
+            <button id="btn-return" type="button" class="btn btn--ghost" hidden>Return book</button>
+            <button id="btn-wait" type="button" class="btn btn--ghost" hidden>Join the waitlist</button>
+            <button id="btn-unwait" type="button" class="btn btn--ghost" hidden>Leave waitlist</button>
+            <button id="btn-close" type="button" class="btn btn--ghost">Close</button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+  </main>
+
+  <!-- TOAST: a small message such as "Borrowed" or "Saved".
+       JS TEAM: write a function showToast(text) that sets the text, removes hidden, and adds hidden back after about 2 seconds (setTimeout).
+       CSS TEAM: place it at the bottom center of the screen with position: fixed. -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <p>Online Library &middot; BSIT Group 1 &middot; ICCT Colleges Foundation Inc. &middot; School project</p>
+  </footer>
+
+  <!-- SCRIPTS: the order matters. app.js holds the code every page needs (it also loads the book list from library/books.json), and the last file is only for this page. -->
+  <script src="js/app.js"></script>
+  <script src="js/catalog.js"></script>
+</body>
+</html>

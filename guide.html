@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team guide | Online Library</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="guide">
+  <!-- TEAM GUIDE: read this first. It is not part of the website menu. -->
+  <main class="page page--guide">
+    <h1>Team guide</h1>
+    <p>Online Library is a website where students find books, manga and manhwa, check if they are available, and read them online. This HTML is finished. The CSS team makes it look good and the JS team makes it work. Nobody needs to change the HTML except to fix mistakes. Tell the HTML person first, because the same change may be needed on every page.</p>
+
+    <h2>Files you create</h2>
+    <ul>
+      <li><strong>css/style.css</strong>: all styles, for the CSS team.</li>
+      <li><strong>library/books.json</strong>: the list of books. The admin page writes it, so nobody edits it by hand.</li>
+      <li><strong>js/app.js</strong>: code every page needs (login check, saving, toast, header changes).</li>
+      <li><strong>js/home.js, catalog.js, book-details.js, reader.js, login.js, my-library.js, admin.js</strong>: one file for each page. The names match the HTML file names.</li>
+    </ul>
+
+    <h2>What a book looks like in library/books.json</h2>
+    <p>The file is a list of books. Every book is an object like this one:</p>
+    <pre><code>{
+  "id": 1,
+  "title": "Pride and Prejudice",
+  "author": "Jane Austen",
+  "genre": "Romance",          // chosen from the fixed genre list
+  "type": "text",              // text, manga, manhwa or comic
+  "year": 1813,
+  "copies": 2,                 // how many copies the library owns
+  "desc": "Short description in your own words.",
+  "textFile": "library/text/1.txt"    // for type text
+}</code></pre>
+    <p>A series with chapters is still ONE book in the list. Its chapters sit inside it:</p>
+    <pre><code>"chapters": [
+  { "number": 1, "title": "The Bridge", "key": "c1", "folder": "library/pages/28/c1", "pageCount": 20, "ext": "webp", "pad": 4 },
+  { "number": 2, "title": "Night Watch", "key": "c2", "folder": "library/pages/28/c2", "pageCount": 18, "ext": "webp", "pad": 4 }
+]</code></pre>
+    <p>Page images are named 0001.webp, 0002.webp and so on inside the chapter folder (pad is the number of digits, ext is the file type). The admin page creates this layout and uploads the files for you.</p>
+    <p>Use books that are free to share, such as the public-domain ones on gutenberg.org. Do not copy text from books that are still under copyright.</p>
+
+    <h2>What gets saved in the browser (localStorage)</h2>
+    <p>There is no server, so the browser's localStorage keeps the users and their reading lists, loans, waitlists and progress. The books themselves are saved in GitHub by the admin page. It only stores text, so turn objects into text with JSON.stringify and back with JSON.parse.</p>
+    <table class="table">
+      <thead><tr><th scope="col">Key</th><th scope="col">What it holds</th></tr></thead>
+      <tbody>
+        <tr><td>users</td><td>A list of users. Each user has username, password, role (user or admin), list, loans and waits (all book ids), and progress, which remembers where the user stopped: { 28: { ch: 2, page: 7 } }.</td></tr>
+        <tr><td>currentUser</td><td>The username of the person logged in, or nothing.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Saving books to GitHub</h2>
+    <p>The admin page saves a book by committing its files to the website's GitHub repository, so every visitor sees it after the site republishes (usually within a minute or two). The admin needs a fine-grained GitHub token for that one repository with the permission Contents: Read and write. Keep the token private and never put it in the code.</p>
+    <p>PDFs are turned into page images with PDF.js (a free library from Mozilla). Put <strong>pdf.min.js</strong> and <strong>pdf.worker.min.js</strong> (version 3.11.174 from cdnjs.com) in a folder named <strong>lib</strong> to work offline, otherwise the page loads them from cdnjs.</p>
+
+    <h2>How borrowing works</h2>
+    <ol>
+      <li>Free copies = the book's copies minus the number of users who have it in loans.</li>
+      <li>Free copies above zero: Borrow adds the book id to the user's loans.</li>
+      <li>No free copies: Join the waitlist adds the book id to the user's waits.</li>
+      <li>Return removes it from loans. If someone is waiting, move the book from their waits to their loans.</li>
+    </ol>
+
+    <h2>Suggested split</h2>
+    <table class="table">
+      <thead><tr><th scope="col">Person</th><th scope="col">Work</th></tr></thead>
+      <tbody>
+        <tr><td>HTML</td><td>These pages, fixes, and keeping the comments up to date.</td></tr>
+        <tr><td>CSS 1</td><td>Header, footer, home page, buttons, login page.</td></tr>
+        <tr><td>CSS 2</td><td>Book cards, catalog, pop-up, reader, my-library, admin.</td></tr>
+        <tr><td>JS 1</td><td>library/books.json, app.js, login, catalog and filters.</td></tr>
+        <tr><td>JS 2</td><td>Book pop-up, borrowing, waitlist, my-library, reader, admin.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Testing</h2>
+    <ul>
+      <li>Open index.html in Chrome or Edge. Press F12 and open the Console tab to see JavaScript errors.</li>
+      <li>In the Application tab you can see and delete what is saved in localStorage.</li>
+      <li>Test as a guest, as a normal user and as admin / admin123.</li>
+      <li>Test on a phone-sized screen with the device toolbar (Ctrl+Shift+M).</li>
+    </ul>
+  </main>
+</body>
+</html>
