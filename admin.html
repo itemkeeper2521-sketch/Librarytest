@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | Online Library</title>
+  <!-- CSS TEAM: every page uses this one file, css/style.css. Create it and write all the styles there.
+       Tip: start with the header, buttons and book cards because they appear on every page. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin">
+
+  <!-- HEADER (the same on every page, so copy any change to all pages).
+       JS TEAM:
+        1. Check localStorage for a logged-in user.
+        2. If someone is logged in, change the text of #auth-btn to "Log out (name)". Unhide the links that have data-auth="user". Admins also get data-auth="admin".
+        Hint: element.hidden = false;
+        3. When the user clicks Log out, remove the saved user and go to index.html.
+       CSS TEAM: the link of the page you are on has aria-current="page". Style it with a[aria-current="page"] { } -->
+  <header class="site-header">
+    <a class="site-header__brand" href="index.html">Online Library</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="my-library.html" data-auth="user" hidden>My Library</a>
+      <a href="admin.html" aria-current="page" data-auth="admin" hidden>Admin</a>
+      <a href="login.html" id="auth-btn" class="btn">Log in</a>
+    </nav>
+  </header>
+
+  <main class="page page--admin">
+    <!-- ADMIN PAGE: only for admins. If the user is not an admin, send them to login.html.
+         Books are saved by committing files to the website's GitHub repository (GitHub's REST API, called with fetch), so every visitor sees them after the site republishes.
+         JS TEAM:
+          1. GitHub connection: the admin enters the owner, repository, branch and a fine-grained token with Contents: read and write. Keep the token in sessionStorage, or in localStorage if Remember is ticked. Never put it in the code or in the repository.
+          2. Save: one commit holds the new files and the updated library/books.json. API steps: read the branch head, create a blob for each file (base64), create a tree, create a commit, then move the branch to it.
+             Text book chapters go to library/text/ID/KEY.txt (one file per chapter). Chapter pages go to library/pages/ID/KEY/0001.webp, 0002.webp and so on.
+          3. Edit: if #book-id has a value, update that book. Delete: ask confirm() first, then commit with the files removed.
+          4. Format dropdown: show #text-chapters-field for "Book" and #chapters-field for manga, manhwa and comics (toggle hidden).
+          5. Chapters: #add-chapter copies the template row into #chapter-rows. Each row has a number, a title and page images or a PDF.
+             Convert PDF pages to images with PDF.js (load it from lib/pdf.min.js or cdnjs) and shrink every image to WebP on a canvas before uploading.
+          6. Genre is a fixed list so the same genre can never be spelled two ways. To add a new genre, add one option to the list in this file.
+         CSS TEAM: make the table scroll sideways on small screens (the table wrapper needs overflow-x: auto) and make the Delete button red so it stands out. -->
+    <h1>Admin dashboard</h1>
+    <details id="github-settings" class="import-help">
+      <summary>GitHub connection (needed to save books)</summary>
+      <p>Books are saved by committing files to the website's GitHub repository. Create a fine-grained personal access token for ONLY that repository with the permission "Contents: Read and write", then paste it below. The token stays in this browser and is never put in the code.</p>
+      <form id="github-form" class="form">
+        <label>GitHub username or organization<input id="gh-owner" required></label>
+        <label>Repository name<input id="gh-repo" required></label>
+        <label>Branch<input id="gh-branch" value="main" required></label>
+        <label>Access token<input id="gh-token" type="password" autocomplete="off" required></label>
+        <label><input id="gh-remember" type="checkbox"> Remember on this device</label>
+        <p id="gh-status" class="muted" aria-live="polite"></p>
+        <div class="actions"><button type="submit" class="btn">Connect</button> <button type="button" id="gh-disconnect" class="btn btn--ghost">Disconnect</button></div>
+      </form>
+    </details>
+    <p id="save-status" class="muted" aria-live="polite"></p>
+
+    <form id="book-form" class="form form--wide">
+      <h2 id="form-title">Add a book</h2>
+      <input type="hidden" id="book-id" name="id">
+      <label>Title<input id="book-title" name="title" required></label>
+      <label>Author<input id="book-author" name="author" required></label>
+      <label>Genre
+        <select id="book-genre" name="genre" required>
+          <option value="">Choose a genre</option>
+          <option>Action</option>
+          <option>Adventure</option>
+          <option>Classic</option>
+          <option>Comedy</option>
+          <option>Drama</option>
+          <option>Epic</option>
+          <option>Fantasy</option>
+          <option>Fiction</option>
+          <option>Gothic</option>
+          <option>Guide</option>
+          <option>Historical</option>
+          <option>Horror</option>
+          <option>Mystery</option>
+          <option>Nature</option>
+          <option>Philosophy</option>
+          <option>Politics</option>
+          <option>Romance</option>
+          <option>Science</option>
+          <option>Science Fiction</option>
+          <option>Slice of Life</option>
+          <option>Sports</option>
+          <option>Thriller</option>
+        </select>
+      </label>
+      <label>Format
+        <select id="book-type" name="type">
+          <option value="text">Book (text)</option>
+          <option value="manga">Manga</option>
+          <option value="manhwa">Manhwa</option>
+          <option value="comic">Comic</option>
+        </select>
+      </label>
+      <label>Year<input id="book-year" name="year" type="number"></label>
+      <label>Copies<input id="book-copies" name="copies" type="number" min="1" value="1" required></label>
+      <label class="form__wide">Description<input id="book-desc" name="description"></label>
+      <!-- TEXT BOOKS: write one chapter at a time. A short book can have a single chapter.
+           JS TEAM: every chapter is a row inside #text-chapter-rows, but only ONE row is visible; the others keep the hidden attribute.
+                    #tc-next shows the next chapter, or adds a new empty one when you are on the last chapter (only if the current chapter has text).
+                    #tc-prev goes back. #tc-jump is a dropdown that lists every chapter so you can jump to one. Save every row that has text as its own file.
+           Show this section only when Format is Book.
+           CSS TEAM: make the chapter text box very large (at least 60% of the screen height) because chapters are long. -->
+      <fieldset id="text-chapters-field" class="form__wide">
+        <legend>Chapters</legend>
+        <div class="chapter-pager" role="group" aria-label="Chapters">
+          <button type="button" id="tc-prev" class="btn btn--ghost" aria-label="Previous chapter">&lt;</button>
+          <select id="tc-jump" aria-label="Jump to a chapter"></select>
+          <button type="button" id="tc-next" class="btn btn--ghost" aria-label="Next chapter, or a new empty chapter if this is the last one">&gt;</button>
+        </div>
+        <div id="text-chapter-rows"></div>
+        <template id="text-chapter-row-template">
+          <div class="text-chapter-row">
+            <div class="text-chapter-row__head">
+              <label>No.<input class="tc-number" type="number" min="1"></label>
+              <label>Chapter title<input class="tc-title"></label>
+              <button type="button" class="btn btn--danger tc-remove">Remove</button>
+            </div>
+            <label>Chapter text (leave a blank line between paragraphs)<textarea class="tc-text" rows="20"></textarea></label>
+          </div>
+        </template>
+      </fieldset>
+      <!-- CHAPTERS (manga, manhwa and comics). A book like a novel uses the text box above instead. -->
+      <fieldset id="chapters-field" class="form__wide" hidden>
+        <legend>Chapters</legend>
+        <div id="chapter-rows"></div>
+        <button type="button" id="add-chapter" class="btn btn--ghost">Add chapter</button>
+        <template id="chapter-row-template">
+          <div class="chapter-row">
+            <label>No.<input class="ch-number" type="number" min="1"></label>
+            <label>Title<input class="ch-title"></label>
+            <label>Page images or a PDF, in order<input class="ch-pages" type="file" accept="image/*,application/pdf" multiple></label>
+            <span class="ch-count muted">No pages yet</span>
+            <button type="button" class="btn btn--danger ch-remove">Remove</button>
+          </div>
+        </template>
+      </fieldset>
+      <div class="actions form__wide">
+        <button type="submit" class="btn">Save book</button>
+        <button type="reset" class="btn btn--ghost">Clear</button>
+      </div>
+    </form>
+
+    <div class="table-wrap">
+      <table id="book-table" class="table">
+        <caption class="visually-hidden">All books in the catalog</caption>
+        <thead>
+          <tr><th scope="col">Title</th><th scope="col">Format</th><th scope="col">Copies</th><th scope="col">Free</th><th scope="col">Actions</th></tr>
+        </thead>
+        <tbody id="book-table-body">
+          <!-- ONE TABLE ROW: JS repeats this for every book. data-action tells JS which button was clicked. -->
+          <tr data-book-id="1">
+            <td>Pride and Prejudice</td><td>Book</td><td>2</td><td>2</td>
+            <td><button type="button" class="btn btn--ghost" data-action="edit">Edit</button> <button type="button" class="btn btn--danger" data-action="delete">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- TOAST: a small message such as "Borrowed" or "Saved".
+       JS TEAM: write a function showToast(text) that sets the text, removes hidden, and adds hidden back after about 2 seconds (setTimeout).
+       CSS TEAM: place it at the bottom center of the screen with position: fixed. -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <p>Online Library &middot; BSIT Group 1 &middot; ICCT Colleges Foundation Inc. &middot; School project</p>
+  </footer>
+
+  <!-- SCRIPTS: the order matters. app.js holds the code every page needs (it also loads the book list from library/books.json), and the last file is only for this page. -->
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
